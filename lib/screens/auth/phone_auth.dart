@@ -14,10 +14,11 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication> {
   String? phoneNumber, verificationId;
   String? otp;
   String authStatus = "";
+  final _formKey = GlobalKey<FormState>();
 
   Future<void> verifyPhoneNumber(BuildContext context) async {
     await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: phoneNumber!,
+      phoneNumber: '+91' + phoneNumber!,
       timeout: const Duration(seconds: 15),
       verificationCompleted: (AuthCredential authCredential) {
         setState(() {
@@ -48,138 +49,182 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication> {
   otpDialogBox(BuildContext context) {
     showDialog(
         context: context,
-        barrierDismissible: false,
+        useSafeArea: true,
         builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Enter your OTP'),
-            content: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(30),
+          return Center(
+            child: AlertDialog(
+              title: const Text('Enter your OTP'),
+              content: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Form(
+                  key: _formKey,
+                  child: TextFormField(
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(30),
+                        ),
+                      ),
+                    ),
+                    onChanged: (value) {
+                      otp = value;
+                    },
+                    validator: (val) {
+                      if (val == null || val == "") {
+                        return "Please enter your otp";
+                      }
+                      if (val.length != 6) {
+                        return "Please enter a valid otp";
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              ),
+              contentPadding: const EdgeInsets.all(13.0),
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12.0))),
+              actions: <Widget>[
+                // ignore: deprecated_member_use
+                FlatButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      signIn(otp!).then((value) {
+                        if (value) {
+                          Navigator.of(context).pop();
+                        }
+                      });
+                    }
+                  },
+                  child: Container(
+                    child: const Text(
+                      'Verify',
                     ),
                   ),
                 ),
-                onChanged: (value) {
-                  otp = value;
-                },
-              ),
+              ],
+              actionsAlignment: MainAxisAlignment.center,
             ),
-            contentPadding: const EdgeInsets.all(10.0),
-            actions: <Widget>[
-              // ignore: deprecated_member_use
-              FlatButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  signIn(otp!);
-                },
-                child: const Text(
-                  'Submit',
-                ),
-              ),
-            ],
           );
         });
   }
 
-  Future<void> signIn(String otp) async {
+  Future<bool> signIn(String otp) async {
     try {
       await FirebaseAuth.instance
           .signInWithCredential(PhoneAuthProvider.credential(
         verificationId: verificationId!,
         smsCode: otp,
       ));
+      return true;
     } catch (e) {
       authStatus =
           (e as FirebaseAuthException).message ?? "Unable to Verify Otp";
       Navigator.of(context).pop();
       setState(() {});
     }
+    return false;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.2,
-            ),
-            const Text(
-              "Phone Auth demo📱",
-              style: TextStyle(
-                color: Colors.cyan,
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
+      body: Stack(
+        children: [
+          Image.asset(
+            "assets/auth_options_bg.png",
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            fit: BoxFit.cover,
+          ),
+          Positioned(child: Container(color: Colors.black.withOpacity(0.3))),
+          Positioned(
+            top: 100,
+            width: MediaQuery.of(context).size.width,
+            child: const Align(
+              alignment: Alignment.center,
+              child: Text(
+                "Continue with Phone Number",
+                style: TextStyle(
+                  color: Colors.red, //Color.fromRGBO(82, 117, 90, 1),
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            Image.network(
-              "https://avatars1.githubusercontent.com/u/41328571?s=280&v=4",
-              height: 150,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TextField(
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                    border: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(30),
+          ),
+          Positioned(
+            height: MediaQuery.of(context).size.height * 0.8,
+            width: MediaQuery.of(context).size.width,
+            child: Center(child: Image.asset("assets/logo.png")),
+          ),
+          Positioned(
+            bottom: 30,
+            // height: MediaQuery.of(context).size.height - 50,
+            width: MediaQuery.of(context).size.width,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    authStatus,
+                    style: TextStyle(
+                        color: authStatus.contains("fail") ||
+                                authStatus.contains("TIMEOUT")
+                            ? Colors.red
+                            : Colors.green),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: TextField(
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                          border: const OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(30),
+                            ),
+                          ),
+                          filled: true,
+                          prefixText: "+91    ",
+                          hintStyle: TextStyle(color: Colors.grey[800]),
+                          hintText: "Enter Your Phone Number...",
+                          fillColor: Colors.white70),
+                      onChanged: (value) {
+                        phoneNumber = value;
+                      },
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10.0,
+                  ),
+                  // ignore: deprecated_member_use
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.85,
+                    height: 40.0,
+                    child: OutlineButton.icon(
+                      borderSide: const BorderSide(
+                        color: Colors.red,
+                        width: 3,
                       ),
+                      color: Colors.red,
+                      textColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      icon: const Icon(Icons.perm_phone_msg_outlined),
+                      label: const Text("Send OTP"),
+                      onPressed: () =>
+                          phoneNumber == null || phoneNumber!.length != 10
+                              ? null
+                              : verifyPhoneNumber(context),
                     ),
-                    filled: true,
-                    prefixIcon: const Icon(
-                      Icons.phone_iphone,
-                      color: Colors.cyan,
-                    ),
-                    hintStyle: TextStyle(color: Colors.grey[800]),
-                    hintText: "Enter Your Phone Number...",
-                    fillColor: Colors.white70),
-                onChanged: (value) {
-                  phoneNumber = value;
-                },
+                  ),
+                ],
               ),
             ),
-            const SizedBox(
-              height: 10.0,
-            ),
-            // ignore: deprecated_member_use
-            RaisedButton(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30)),
-              onPressed: () =>
-                  phoneNumber == null ? null : verifyPhoneNumber(context),
-              child: const Text(
-                "Generate OTP",
-                style: TextStyle(color: Colors.white),
-              ),
-              elevation: 7.0,
-              color: Colors.cyan,
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            const Text(
-              "Please enter the phone number followed by country code",
-              style: TextStyle(color: Colors.green),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Text(
-              authStatus == "" ? "" : authStatus,
-              style: TextStyle(
-                  color: authStatus.contains("fail") ||
-                          authStatus.contains("TIMEOUT")
-                      ? Colors.red
-                      : Colors.green),
-            )
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
