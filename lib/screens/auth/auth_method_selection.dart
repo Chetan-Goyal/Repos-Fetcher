@@ -1,9 +1,21 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:repos_fetcher/services/auth/biometric_auth.dart';
 
-class AuthMethodSelection extends StatelessWidget {
+class AuthMethodSelection extends StatefulWidget {
   const AuthMethodSelection({Key? key}) : super(key: key);
 
   static const String route = '/auth-method-selection';
+
+  @override
+  State<AuthMethodSelection> createState() => _AuthMethodSelectionState();
+}
+
+class _AuthMethodSelectionState extends State<AuthMethodSelection> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +53,11 @@ class AuthMethodSelection extends StatelessWidget {
                     ),
                     icon: const Icon(Icons.account_circle),
                     label: const Text("Continue with Biometric"),
-                    onPressed: () async {},
+                    onPressed: () async {
+                      if (await BiometricAuth().isBiometricPresent()) {
+                        await BiometricAuth().isConfirmed();
+                      }
+                    },
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -60,7 +76,10 @@ class AuthMethodSelection extends StatelessWidget {
                     ),
                     icon: const Icon(Icons.perm_phone_msg_outlined),
                     label: const Text("Continue with Phone Number"),
-                    onPressed: () async {},
+                    onPressed: () async {
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, '/phone-auth', (route) => false);
+                    },
                   ),
                 ),
               ],
