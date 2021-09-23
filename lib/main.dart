@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:repos_fetcher/screens/auth/auth_method_selection.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:repos_fetcher/screens/auth/phone_auth.dart';
+import 'package:repos_fetcher/screens/home_page/home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +24,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/auth-method-selection': (context) => const AuthMethodSelection(),
         '/phone-auth': (context) => const PhoneAuthentication(),
+        '/home-page': (context) => const HomePage(),
       },
     );
   }

@@ -97,10 +97,8 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication> {
                       });
                     }
                   },
-                  child: Container(
-                    child: const Text(
-                      'Verify',
-                    ),
+                  child: const Text(
+                    'Verify',
                   ),
                 ),
               ],
