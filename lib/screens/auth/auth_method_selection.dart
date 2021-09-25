@@ -1,3 +1,4 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:repos_fetcher/services/auth/biometric_auth.dart';
 
@@ -54,7 +55,16 @@ class _AuthMethodSelectionState extends State<AuthMethodSelection> {
                     label: const Text("Continue with Biometric"),
                     onPressed: () async {
                       if (await BiometricAuth().isBiometricPresent()) {
-                        await BiometricAuth().isConfirmed();
+                        bool result = await BiometricAuth().isConfirmed();
+                        if (result) {
+                          BotToast.showText(text: "Successfully Logged In");
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, '/home-page', (route) => false);
+                        } else {
+                          BotToast.showText(
+                              text:
+                                  "Unable to Verify your Identity. Please Try again!");
+                        }
                       }
                     },
                   ),

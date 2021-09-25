@@ -6,6 +6,7 @@ import 'package:repos_fetcher/screens/home_page/widgets/repo_item.dart';
 import 'package:repos_fetcher/services/internet_connectivity.dart';
 import 'package:repos_fetcher/services/repo/repo_api.dart';
 import 'package:repos_fetcher/services/repo/repo_local.dart';
+import 'package:bot_toast/bot_toast.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -32,8 +33,18 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _connectivity.initialise();
     _connectivity.myStream.listen((source) {
+      if (_source == null) {
+        BotToast.cleanAll();
+      } else if (_source == ConnectivityResult.none &&
+          source.keys.toList()[0] != ConnectivityResult.none) {
+        BotToast.showText(text: "Hoorayy! Loading Latest Data!");
+        _pagingController.refresh();
+        _pagingController.retryLastFailedRequest();
+      }
       _source = source.keys.toList()[0];
       if (_source == ConnectivityResult.none) {
+        BotToast.showText(
+            text: "Please Check your Internet Connection. Loading Old Data!");
         getReposFromLocal().then((value) {
           localRepoList = value;
           setState(() {});
@@ -70,28 +81,29 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_source == null) {
+      BotToast.showLoading();
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(96, 125, 139, 1),
         title: const Text("Jake's Git"),
       ),
-      body: _source == null
-          ? const Center(child: CircularProgressIndicator())
-          : _source == ConnectivityResult.none
-              ? ListView.separated(
-                  itemBuilder: (context, index) => RepoItem(
-                        item: localRepoList[index],
-                      ),
-                  separatorBuilder: (context, index) => const Divider(),
-                  itemCount: localRepoList.length)
-              : PagedListView<int, RepoDetails>.separated(
-                  pagingController: _pagingController,
-                  builderDelegate: PagedChildBuilderDelegate<RepoDetails>(
-                    animateTransitions: true,
-                    itemBuilder: (context, item, index) => RepoItem(item: item),
+      body: _source == ConnectivityResult.none
+          ? ListView.separated(
+              itemBuilder: (context, index) => RepoItem(
+                    item: localRepoList[index],
                   ),
-                  separatorBuilder: (context, index) => const Divider(),
-                ),
+              separatorBuilder: (context, index) => const Divider(),
+              itemCount: localRepoList.length)
+          : PagedListView<int, RepoDetails>.separated(
+              pagingController: _pagingController,
+              builderDelegate: PagedChildBuilderDelegate<RepoDetails>(
+                animateTransitions: true,
+                itemBuilder: (context, item, index) => RepoItem(item: item),
+              ),
+              separatorBuilder: (context, index) => const Divider(),
+            ),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:repos_fetcher/models/repo_details.dart';
@@ -26,7 +27,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/home-page', //'/auth-method-selection',
+      builder: BotToastInit(),
+      navigatorObservers: [BotToastNavigatorObserver()],
+      initialRoute: '/auth-method-selection',
       routes: {
         '/auth-method-selection': (context) => const AuthMethodSelection(),
         '/phone-auth': (context) => const PhoneAuthentication(),
