@@ -5,14 +5,17 @@ import 'package:repos_fetcher/models/repo_details.dart';
 
 class RepoApi {
   static Future<List<RepoDetails>> getRepoList(pageKey, _pageSize) async {
-    var resp = await http.get(
-      Uri.parse(
-          "https://api.github.com/users/JakeWharton/repos?page=${((pageKey / _pageSize) as double).toInt()}&per_page=$_pageSize"),
-    );
-    print("Fetched Data $pageKey");
-    List result = json.decode(resp.body);
-    List<RepoDetails> finalResult =
-        result.map((e) => RepoDetails.fromJson(e)).toList();
+    List<RepoDetails> finalResult = [];
+    try {
+      var resp = await http.get(
+        Uri.parse(
+            "https://api.github.com/users/JakeWharton/repos?page=${((pageKey / _pageSize) as double).toInt()}&per_page=$_pageSize"),
+      );
+      List result = json.decode(resp.body);
+      finalResult = result.map((e) => RepoDetails.fromJson(e)).toList();
+    } catch (e) {
+      return [];
+    }
     return finalResult;
   }
 }

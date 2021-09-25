@@ -1,10 +1,27 @@
-class RepoDetails {
+import 'package:hive/hive.dart';
+part 'repo_details.g.dart';
+
+@HiveType(typeId: 0)
+class RepoDetails extends HiveObject {
+  @HiveField(0)
   int? id;
+
+  @HiveField(1)
   String? nodeId;
+
+  @HiveField(2)
   String? name;
+
+  @HiveField(3)
   String? description;
+
+  @HiveField(4)
   int? watchersCount;
+
+  @HiveField(5)
   String? language;
+
+  @HiveField(6)
   int? openIssuesCount;
 
   RepoDetails(

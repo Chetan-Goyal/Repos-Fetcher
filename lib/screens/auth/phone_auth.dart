@@ -37,12 +37,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication> {
         });
         otpDialogBox(context);
       },
-      codeAutoRetrievalTimeout: (String verId) {
-        verificationId = verId;
-        setState(() {
-          authStatus = "TIMEOUT";
-        });
-      },
+      codeAutoRetrievalTimeout: (String verId) {},
     );
   }
 
@@ -92,7 +87,8 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication> {
                     if (_formKey.currentState!.validate()) {
                       signIn(otp!).then((value) {
                         if (value) {
-                          Navigator.of(context).pop();
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, '/home-page', (route) => false);
                         }
                       });
                     }
@@ -146,7 +142,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication> {
                 "Continue with Phone Number",
                 style: TextStyle(
                   color: Colors.red, //Color.fromRGBO(82, 117, 90, 1),
-                  fontSize: 30,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
               ),
