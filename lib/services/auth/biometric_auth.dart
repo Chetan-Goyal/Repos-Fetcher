@@ -11,8 +11,7 @@ class BiometricAuth {
   Future<bool> isConfirmed(
       {String message = "Please Authenticate to use our services"}) async {
     bool didAuthenticate = await localAuth.authenticate(
-      localizedReason: 'Please authenticate to show account balance',
-      // biometricOnly: true,
+      localizedReason: 'Please authenticate to get Jake\'s Repos List',
     );
     return didAuthenticate;
   }
